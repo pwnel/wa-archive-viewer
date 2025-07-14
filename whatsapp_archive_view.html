@@ -174,11 +174,12 @@
                 let contactName = '';
 
                 if (file.name.endsWith('.zip')) {
-                    // Extract contact name from filename
-                    if (file.name.startsWith('WhatsApp Chat with ')) {
-                        contactName = file.name.slice(19, -4).trim();
-                    } else if (file.name.startsWith('WhatsApp Chat - ')) {
-                        contactName = file.name.slice(16, -4).trim();
+                    // Extract contact name from filename, handling year suffix
+                    let baseName = file.name.replace(/\.zip$/, '').trim();
+                    if (baseName.startsWith('WhatsApp Chat with ')) {
+                        contactName = baseName.slice(19).replace(/ - \d{4}$/, '').trim();
+                    } else if (baseName.startsWith('WhatsApp Chat - ')) {
+                        contactName = baseName.slice(16).replace(/ - \d{4}$/, '').trim();
                     }
                     const zip = await JSZip.loadAsync(file);
                     const chatFile = Object.values(zip.files).find(f => f.name.endsWith('_chat.txt') || f.name.endsWith('.txt'));
@@ -318,4 +319,3 @@
         }
     </script>
 </body>
-</html>
