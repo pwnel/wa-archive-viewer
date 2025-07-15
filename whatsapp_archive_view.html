@@ -174,13 +174,18 @@
                 let contactName = '';
 
                 if (file.name.endsWith('.zip')) {
-                    // Extract contact name from filename, handling year suffix
-                    let baseName = file.name.replace(/\.zip$/, '').trim();
-                    if (baseName.startsWith('WhatsApp Chat with ')) {
-                        contactName = baseName.slice(19).replace(/ - \d{4}$/, '').trim();
-                    } else if (baseName.startsWith('WhatsApp Chat - ')) {
-                        contactName = baseName.slice(16).replace(/ - \d{4}$/, '').trim();
+                    // --- Improved contact name extraction below ---
+                    let match = file.name.match(/^WhatsApp Chat (?:with|-)\s+(.+?)(?:\s+-\s+\d{4})?\.zip$/i);
+                    if (match) {
+                        contactName = match[1].trim();
+                    } else {
+                        // fallback: try removing WhatsApp Chat -/with and year
+                        let baseName = file.name.replace(/\.zip$/, '').trim();
+                        baseName = baseName.replace(/^WhatsApp Chat (with|-)\s+/, '');
+                        contactName = baseName.replace(/\s+-\s+\d{4}$/, '').trim();
                     }
+                    // --- end improved extraction ---
+
                     const zip = await JSZip.loadAsync(file);
                     const chatFile = Object.values(zip.files).find(f => f.name.endsWith('_chat.txt') || f.name.endsWith('.txt'));
                     if (chatFile) {
@@ -319,3 +324,5 @@
         }
     </script>
 </body>
+</html>
+
